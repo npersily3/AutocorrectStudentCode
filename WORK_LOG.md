@@ -1,9 +1,9 @@
-Name: YOUR NAME HERE
+Name: Noah Persily
 
-| Date    |  Time  |                                     Update |
-|:--------|:------:|-------------------------------------------:|
-| April 5 | 9-10pm | I tried to write abstract, efficient code. |
-|         |        |                                            |
+| Date    |   Time    |                                                                                                                                                                                                                                                                                                                                                                      Update |
+|:--------|:---------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| March 5 | 11-1130am | Initial thinking period. I am calling my approach the Ship of Theseus approach. Using the mistyped word as a backbone, I want to generate all possible words with an edit distance of some later to be determined threshold. I will think of each letter as a node in a graph, or a weighted graph where each weight is the weight assigned to either replace, add, delete. |
+|         |           |                                                                                                                                                                                                                                                                                                                                                                             |
 
 
 To add a new row to the table, click into a cell and then hit shift-enter.
