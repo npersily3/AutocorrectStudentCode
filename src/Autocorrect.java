@@ -20,6 +20,44 @@ public class Autocorrect {
     public Autocorrect(String[] words, int threshold) {
 
     }
+    public int editDistance(String s1, String s2) {
+
+        int[][] table = new int[s1.length()][s2.length()];
+
+        boolean seen = false;
+        if(s1.charAt(0) == s2.charAt(0)) {
+            table[0][0] = 0;
+        } else {
+            table[0][0] = 1;
+        }
+
+        for (int i = 1; i < table.length; i++) {
+            if(s1.charAt(i) == s2.charAt(0)) {
+                if(seen) {
+                    table[i][0] = table[i-1][0] + 1;
+                } else {
+                    seen = true;
+                    table[i][0] = table[i-1][0];
+                }
+            } else {
+                table[i][0] = table[i-1][0] + 1;
+            }
+        }
+        seen = false;
+        for (int i = 1; i < table[0].length; i++) {
+            if(s1.charAt(0) == s2.charAt(i)) {
+                if(seen) {
+                    table[0][i] = table[0][i-1] + 1;
+                } else {
+                    seen = true;
+                    table[0][i] = table[0][i - 1];
+                }
+            } else {
+                table[0][i] = table[0][i-1] + 1;
+            }
+        }
+        return 0;
+    }
 
     /**
      * Runs a test from the tester file, AutocorrectTester.
