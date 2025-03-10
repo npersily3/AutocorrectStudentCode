@@ -56,7 +56,19 @@ public class Autocorrect {
                 table[0][i] = table[0][i-1] + 1;
             }
         }
-        return 0;
+
+
+        for (int i = 1; i < table.length; i++) {
+            for (int j = 1; j < table[0].length; j++) {
+                if(s1.charAt(i) == s2.charAt(j)) {
+                    table[i][j] = table[i-1][j-1];
+                }
+                else {
+                    table[i][j] = (int) Math.ceil((table[i-1][j] + table[i][j-1])/2.0);
+                }
+            }
+        }
+        return table[table.length - 1][table[0].length - 1];
     }
 
     /**
