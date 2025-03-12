@@ -1,4 +1,5 @@
 import org.junit.Test;
+
 import org.junit.jupiter.api.Timeout;
 import java.io.*;
 import java.util.concurrent.TimeUnit;
@@ -10,7 +11,7 @@ public class AutocorrectTester {
     private int threshold;
     private String typed;
 
-    @Test
+    @org.junit.jupiter.api.Test
     @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
     public void testSmall() {
         setTestData(0);
@@ -18,7 +19,7 @@ public class AutocorrectTester {
         assertArrayEquals(matches, studentSolution.runTest(typed), "Incorrect words returned.");
     }
 
-    @Test
+    @org.testng.annotations.Test
     @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
     public void testMed() {
         setTestData(1);
