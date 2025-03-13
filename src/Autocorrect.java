@@ -60,45 +60,19 @@ public class Autocorrect {
 
     public int editDistance(String s1, String s2) {
 
-        int[][] table = new int[s1.length()][s2.length()];
+        int[][] table = new int[s1.length() + 1][s2.length() + 1];
 
-        boolean seen = false;
-        if (s1.charAt(0) == s2.charAt(0)) {
-            table[0][0] = 0;
-        } else {
-            table[0][0] = 1;
+        for (int i = 0; i < table.length; i++) {
+            table[i][0] = i;
         }
-
-        for (int i = 1; i < table.length; i++) {
-            if (s1.charAt(i) == s2.charAt(0)) {
-                if (seen) {
-                    table[i][0] = table[i - 1][0] + 1;
-                } else {
-                    seen = true;
-                    table[i][0] = table[i - 1][0];
-                }
-            } else {
-                table[i][0] = table[i - 1][0] + 1;
-            }
-        }
-        seen = false;
-        for (int i = 1; i < table[0].length; i++) {
-            if (s1.charAt(0) == s2.charAt(i)) {
-                if (seen) {
-                    table[0][i] = table[0][i - 1] + 1;
-                } else {
-                    seen = true;
-                    table[0][i] = table[0][i - 1];
-                }
-            } else {
-                table[0][i] = table[0][i - 1] + 1;
-            }
+        for (int i = 0; i < table[0].length; i++) {
+            table[0][i] = i;
         }
 
 
         for (int i = 1; i < table.length; i++) {
             for (int j = 1; j < table[0].length; j++) {
-                if (s1.charAt(i) == s2.charAt(j)) {
+                if (s1.charAt(i - 1) == s2.charAt(j - 1)) {
                     table[i][j] = table[i - 1][j - 1];
                 } else {
                     // Delete
@@ -128,14 +102,29 @@ public class Autocorrect {
 
         int length = dictionary.length;
         for (int i = 0; i < length; i++) {
+
+            if(dictionary[i].equals("memento")) {
+                System.out.println("menlo");
+            }
+
             int editDistance = editDistance(typed, dictionary[i]);
+
+
             if( editDistance <= threshold) {
                 valid.add(new Pair(dictionary[i], editDistance) );
             }
         }
         valid.sort(Comparator.comparing(Pair::getWord));
         valid.sort(Comparator.comparing(Pair::getThreshold));
-       return null;
+
+        int validLength = valid.size();
+        String[] correct = new String[validLength];
+
+        for (int i = 0; i < validLength; i++) {
+            correct[i] = valid.get(i).word;
+            System.out.println(correct[i]);
+        }
+       return correct;
     }
 
 
@@ -158,10 +147,16 @@ public class Autocorrect {
             for (int i = 0; i < n; i++) {
                 line = dictReader.readLine();
                 words[i] = line;
+
             }
             return words;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void main(String[] args) {
+
+
     }
 }

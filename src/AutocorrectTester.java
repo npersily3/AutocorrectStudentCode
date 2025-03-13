@@ -19,7 +19,7 @@ public class AutocorrectTester {
         assertArrayEquals(matches, studentSolution.runTest(typed), "Incorrect words returned.");
     }
 
-    @org.testng.annotations.Test
+    @Test
     @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
     public void testMed() {
         setTestData(1);
