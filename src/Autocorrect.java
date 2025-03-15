@@ -24,7 +24,7 @@ public class Autocorrect {
 
     private String[] dictionary;
     private int threshold;
-    public static final int DIVIDOR = 1412;
+    public static final int DIVIDOR = 1413;
     public static final int MAX_CANDIDATES = 6;
 
 
