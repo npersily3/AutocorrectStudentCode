@@ -1,7 +1,6 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -24,6 +23,7 @@ public class Autocorrect {
 
     private String[] dictionary;
     private int threshold;
+
 
     private class Pair {
         String word;
@@ -144,6 +144,8 @@ public class Autocorrect {
             int n = Integer.parseInt(line);
             String[] words = new String[n];
 
+
+
             for (int i = 0; i < n; i++) {
                 line = dictReader.readLine();
                 words[i] = line;
@@ -155,8 +157,37 @@ public class Autocorrect {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
+        main2();
+//        Scanner s = new Scanner(System.in);
+//
+//        System.out.println("What is your word");
+//        String word = s.nextLine();
+//
+//        System.out.println("--------------------------------------");
+
+    }
+    public static void main2() {
+        try {
+            String line;
+            BufferedWriter dictWriter = new BufferedWriter(new FileWriter("sorted.txt"));
+            String[] dictionary = loadDictionary("large");
+            Arrays.sort(dictionary, Comparator.comparing(String::length));
+
+            int length = dictionary.length;
+
+            dictWriter.write(length + "");
+            dictWriter.newLine();
+            for (String s: dictionary) {
+                dictWriter.write(s);
+                dictWriter.newLine();
+            }
+            dictWriter.close();
 
 
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

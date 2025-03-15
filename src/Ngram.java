@@ -46,7 +46,12 @@ public class Ngram {
 
 
     }
-    private static void generateNgrams(String word) {
+    private static String[] generateNgrams(String word) {
 
+        ArrayList<String> ngrams = new ArrayList<>();
+
+
+
+        return ngrams.toArray(new String[0]);
     }
 }
