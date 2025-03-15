@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Scanner;
 
 /**
  * Autocorrect
@@ -23,15 +24,17 @@ public class Autocorrect {
 
     private String[] dictionary;
     private int threshold;
+    public static final int DIVIDOR = 1412;
+    public static final int MAX_CANDIDATES = 6;
 
 
     private class Pair {
         String word;
-        int threshold;
+        int editDistance;
 
         private Pair(String word, int threshold) {
             this.word = word;
-            this.threshold = threshold;
+            this.editDistance = threshold;
 
         }
 
@@ -43,12 +46,12 @@ public class Autocorrect {
             this.word = word;
         }
 
-        public int getThreshold() {
-            return threshold;
+        public int getEditDistance() {
+            return editDistance;
         }
 
         public void setThreshold(int threshold) {
-            this.threshold = threshold;
+            this.editDistance = threshold;
         }
     }
 
@@ -57,6 +60,11 @@ public class Autocorrect {
         dictionary = words;
         this.threshold = threshold;
     }
+    public Autocorrect(String[] words) {
+
+        dictionary = words;
+    }
+
 
     public int editDistance(String s1, String s2) {
 
@@ -103,9 +111,6 @@ public class Autocorrect {
         int length = dictionary.length;
         for (int i = 0; i < length; i++) {
 
-            if(dictionary[i].equals("memento")) {
-                System.out.println("menlo");
-            }
 
             int editDistance = editDistance(typed, dictionary[i]);
 
@@ -115,7 +120,7 @@ public class Autocorrect {
             }
         }
         valid.sort(Comparator.comparing(Pair::getWord));
-        valid.sort(Comparator.comparing(Pair::getThreshold));
+        valid.sort(Comparator.comparing(Pair::getEditDistance));
 
         int validLength = valid.size();
         String[] correct = new String[validLength];
@@ -159,14 +164,56 @@ public class Autocorrect {
 
     public static void main(String[] args)
     {
-        main2();
-//        Scanner s = new Scanner(System.in);
-//
-//        System.out.println("What is your word");
-//        String word = s.nextLine();
-//
-//        System.out.println("--------------------------------------");
+         Autocorrect a = new Autocorrect(loadDictionary("sorted"));
 
+        Scanner s = new Scanner(System.in);
+
+        System.out.println("What is your word");
+        String word = s.nextLine();
+
+        String[] candidates;
+        if(word.length() <= Ngram.N) {
+            candidates = a.smallMatches(word);
+        } else {
+
+        }
+
+
+        System.out.println("--------------------------------------");
+
+    }
+    public  String[] smallMatches(String word) {
+
+       ArrayList<Pair> candidates = new ArrayList<>();
+
+       // Create the initial candidates then sort them by edit distance
+        for (int i = 0; i < MAX_CANDIDATES; i++) {
+            candidates.add(new Pair(dictionary[i], editDistance(dictionary[i], word)));
+        }
+
+        candidates.sort(Comparator.comparing(Pair::getEditDistance));
+
+
+        // For all the words that are less than three letters
+        for (int i = MAX_CANDIDATES; i < DIVIDOR; i++) {
+            int editDistance = editDistance(dictionary[i], word);
+            // Check to see if the current word has a shorter edit distance than the word that has lowest edit distance currently being tracked in candidates
+            if(candidates.get(MAX_CANDIDATES - 1).editDistance > editDistance) {
+                // Iterate through the candidates list and insert the new word by edit distance
+                for (int j = MAX_CANDIDATES - 1; j > - 1; j--) {
+                    if(editDistance > candidates.get(j).editDistance) {
+                        candidates.removeLast();
+                        candidates.add(j, new Pair(dictionary[i], editDistance));
+                    }
+                }
+            }
+        }
+        // Return the top six candidates as an array
+        String[] candidateArr = new String[6];
+        for (int i = 0; i < 6; i++) {
+            candidateArr[i] = candidates.get(i).word;
+        }
+        return candidateArr;
     }
     public static void main2() {
         try {
