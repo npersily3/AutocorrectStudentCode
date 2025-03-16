@@ -1,8 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Autocorrect
@@ -27,14 +24,15 @@ public class Autocorrect {
     public static final int DIVIDOR = 1413;
     public static final int MAX_CANDIDATES = 6;
 
+    private HashMap<String, ArrayList<String>> table;
 
     private class Pair {
         String word;
         int editDistance;
 
-        private Pair(String word, int threshold) {
+        private Pair(String word, int editDistance) {
             this.word = word;
-            this.editDistance = threshold;
+            this.editDistance = editDistance;
 
         }
 
@@ -64,6 +62,10 @@ public class Autocorrect {
 
         dictionary = words;
     }
+    public Autocorrect() {
+        table = new HashMap<>();
+    }
+
 
 
     public int editDistance(String s1, String s2) {
@@ -164,7 +166,7 @@ public class Autocorrect {
 
     public static void main(String[] args)
     {
-         Autocorrect a = new Autocorrect(loadDictionary("sorted"));
+
 
         Scanner s = new Scanner(System.in);
 
@@ -173,8 +175,11 @@ public class Autocorrect {
 
         String[] candidates;
         if(word.length() <= Ngram.N) {
+            Autocorrect a = new Autocorrect(loadDictionary("sorted"));
             candidates = a.smallMatches(word);
         } else {
+            Autocorrect a = new Autocorrect();
+            candidates = a.generateCandidates(word);
 
         }
 
@@ -182,20 +187,64 @@ public class Autocorrect {
         System.out.println("--------------------------------------");
 
     }
+    public String[] generateCandidates(String word) {
+        this.initTable();
+        String[] ngrams = Ngram.generateNgrams(word);
+
+        ArrayList<Pair> candidates = new ArrayList<>();
+        populateCandidates(candidates);
+
+        for (int i = 0; i < ngrams.length; i++) {
+            for (int j = 0; j < table.get(ngrams[i]).size(); j++) {
+                int editDistance = editDistance(table.get(ngrams[i]).get(j), word);
+            }
+        }
+
+
+
+        return null;
+    }
+    public void initTable() {
+
+
+        try {
+            String line;
+            BufferedReader dictReader = new BufferedReader(new FileReader("table.txt"));
+            line = dictReader.readLine();
+
+            // Update instance variables with test data
+            int length = Integer.parseInt(line);
+
+            for (int i = 0; i < length; i++) {
+                String ngram = dictReader.readLine();
+                String value = dictReader.readLine();
+                table.put(ngram, new ArrayList<>());
+                while (!value.equals(Ngram.END_OF_LIST)) {
+                    table.get(ngram).add(value);
+                    value = dictReader.readLine();
+                }
+            }
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+    private void populateCandidates(ArrayList<Pair> candidates) {
+        Pair nullCandidate = new Pair(null, 100);
+        for (int i = 0; i < MAX_CANDIDATES; i++) {
+            candidates.add(nullCandidate);
+        }
+    }
     public  String[] smallMatches(String word) {
 
        ArrayList<Pair> candidates = new ArrayList<>();
 
-       // Create the initial candidates then sort them by edit distance
-        for (int i = 0; i < MAX_CANDIDATES; i++) {
-            candidates.add(new Pair(dictionary[i], editDistance(dictionary[i], word)));
-        }
-
-        candidates.sort(Comparator.comparing(Pair::getEditDistance));
-
+       populateCandidates(candidates);
 
         // For all the words that are less than three letters
-        for (int i = MAX_CANDIDATES; i < DIVIDOR; i++) {
+        for (int i = 0; i < DIVIDOR; i++) {
             int editDistance = editDistance(dictionary[i], word);
             // Check to see if the current word has a shorter edit distance than the word that has lowest edit distance currently being tracked in candidates
             if(candidates.get(MAX_CANDIDATES - 1).editDistance > editDistance) {
@@ -215,7 +264,8 @@ public class Autocorrect {
         }
         return candidateArr;
     }
-    public static void main2() {
+
+    public static void sortDictionary() {
         try {
             String line;
             BufferedWriter dictWriter = new BufferedWriter(new FileWriter("sorted.txt"));

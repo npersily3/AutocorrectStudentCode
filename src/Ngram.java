@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class Ngram {
 
     public static final int N = 4;
-    public static final int DIVIDOR = 1412;
+
     public static final String END_OF_LIST = "0";
 
     private static String[] loadDictionary(String dictionary) {
@@ -73,7 +73,7 @@ public class Ngram {
     }
 
 
-    private static String[] generateNgrams(String word) {
+    public static String[] generateNgrams(String word) {
 
 
         ArrayList<String> ngrams = new ArrayList<>();
