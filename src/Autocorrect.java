@@ -21,7 +21,7 @@ public class Autocorrect {
 
     private String[] dictionary;
     private int threshold;
-    public static final int DIVIDOR = 1413;
+    public static final int DIVIDOR = 163;
     public static final int MAX_CANDIDATES = 6;
 
     private HashMap<String, ArrayList<String>> table;
@@ -216,12 +216,13 @@ public class Autocorrect {
 
                 if(candidates.get(MAX_CANDIDATES - 1).editDistance > editDistance) {
                     // Iterate through the candidates list and insert the new word by edit distance
-                    for (int k = MAX_CANDIDATES - 1; k > - 1; k--) {
-                        if(editDistance < candidates.get(k).editDistance) {
-                            candidates.removeLast();
-                            candidates.add(k, new Pair(table.get(ngrams[i]).get(j), editDistance));
-                        }
+                    int counter = MAX_CANDIDATES - 1;
+                    while (editDistance < candidates.get(counter).editDistance && counter > 0) {
+                        counter--;
                     }
+
+                    candidates.removeLast();
+                    candidates.add(counter, new Pair(table.get(ngrams[i]).get(j),editDistance));
                 }
             }
         }
@@ -305,7 +306,7 @@ public class Autocorrect {
     public static void sortDictionary() {
         try {
             String line;
-            BufferedWriter dictWriter = new BufferedWriter(new FileWriter("sorted.txt"));
+            BufferedWriter dictWriter = new BufferedWriter(new FileWriter("/dictionares/sorted.txt"));
             String[] dictionary = loadDictionary("large");
             Arrays.sort(dictionary, Comparator.comparing(String::length));
 
