@@ -205,7 +205,7 @@ public class Autocorrect {
     }
     public String[] generateCandidates(String word) {
         this.initTable();
-        String[] ngrams = Ngram.generateNgrams(word);
+        int[] ngrams = Ngram.generateNgrams(word);
 
         ArrayList<Pair> candidates = new ArrayList<>();
         populateCandidates(candidates);

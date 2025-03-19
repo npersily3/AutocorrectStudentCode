@@ -1,17 +1,15 @@
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 
 public class Ngram {
 
     public static final int N = 3;
 
-    public static final String END_OF_LIST = "0";
+    public static final int END_OF_LIST = -1;
     public static final int RADIX = 27;
     public static final int DIVISOR = (int) Math.pow(RADIX, N - 1);
     public static final int TABLE_LENGTH = (int) Math.pow(RADIX, N);
-    public static ArrayList<String>[] TABLE = new ArrayList[TABLE_LENGTH];
-
 
 
     private static String[] loadDictionary(String dictionary) {
@@ -37,39 +35,32 @@ public class Ngram {
 
     public static void main(String[] args) {
         String[] dictionary = loadDictionary("sorted");
-        HashMap<String, ArrayList<String>> table = new HashMap<>();
+        ArrayList<Integer>[] table = new ArrayList[TABLE_LENGTH];
 
         for (int i = Autocorrect.DIVIDOR; i < dictionary.length; i++) {
-            String[] ngrams = generateNgrams(dictionary[i], i);
+            int[] ngrams = generateNgrams(dictionary[i]);
             for (int j = 0; j < ngrams.length; j++) {
-                if (table.containsKey(ngrams[j])) {
-                    table.get(ngrams[j]).add(dictionary[i]);
-                } else {
-                    table.put(ngrams[j], new ArrayList<>());
-                    table.get(ngrams[j]).add(dictionary[i]);
+                if (table[ngrams[j]] == null) {
+                    table[ngrams[j]] = new ArrayList<>();
                 }
+                table[ngrams[j]].add(i);
             }
         }
 
 
         try {
-            BufferedWriter dictWriter = new BufferedWriter(new FileWriter("table.txt"));
+            BufferedWriter dictWriter = new BufferedWriter(new FileWriter(N + "gram.txt"));
 
-            String[] keys = table.keySet().toArray(new String[0]);
 
-            dictWriter.write(keys.length + "");
-            dictWriter.newLine();
-            for (int i = 0; i < keys.length; i++) {
-                dictWriter.write(keys[i]);
-                dictWriter.newLine();
-                for (int j = 0; j < table.get(keys[i]).size(); j++) {
-                    dictWriter.write(table.get(keys[i]).get(j));
-                    dictWriter.newLine();
+            for (int i = 0; i < table.length; i++) {
+                if (table[i] != null) {
+                    dictWriter.write(i);
+                    for (int j = 0; j < table[i].size(); j++) {
+                        dictWriter.write(table[i].get(j));
+                    }
+                    dictWriter.write(END_OF_LIST);
                 }
-                dictWriter.write(END_OF_LIST);
-                dictWriter.newLine();
             }
-
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -78,36 +69,51 @@ public class Ngram {
     }
 
 
-    public static String[] generateNgrams(String word, int index) {
+    public static int[] generateNgrams(String word) {
 
 
-        ArrayList<String> ngrams = new ArrayList<>();
+        ArrayList<Integer> hashes = new ArrayList<>();
+        int hash = hash(word.substring(0, N));
+        hashes.add(hash);
         for (int i = N; i < word.length(); i++) {
-            String ngram = "";
-            for (int j = i - N; j < i; j++) {
-                ngram += word.charAt(j);
+            hash = hash % DIVISOR;
+            hash *= RADIX;
+            char letter = word.charAt(i);
+            if (letter == "'".charAt(0)) {
+                hash += RADIX - 1;
+            } else {
+                hash += letter - 'a';
             }
-            ngrams.add(ngram);
+            hashes.add(hash);
         }
-        return ngrams.toArray(new String[0]);
+
+        int[] hashArr = new int[hashes.size()];
+
+        for (int i = 0; i < hashArr.length; i++) {
+            hashArr[i] = hashes.get(i);
+        }
+
+        return hashArr;
     }
 
-    private int hash(String word) {
+    private static int hash(String word) {
         char letter = word.charAt(0);
         int sum = 0;
         if (letter == "'".charAt(0)) {
-             sum += RADIX - 1;
+            sum += RADIX - 1;
         } else {
-             sum += letter - 'a';
+            sum += letter - 'a';
         }
 
-        for (int i = 0; i < word.length(); i++) {
+        for (int i = 1; i < word.length(); i++) {
+            letter = word.charAt(i);
             sum *= RADIX;
             if (letter == "'".charAt(0)) {
                 sum += RADIX - 1;
             } else {
                 sum += letter - 'a';
             }
+
 
         }
         return sum;
