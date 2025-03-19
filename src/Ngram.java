@@ -54,12 +54,13 @@ public class Ngram {
 
             for (int i = 0; i < table.length; i++) {
                 if (table[i] != null) {
-                    dictWriter.write(i);
                     for (int j = 0; j < table[i].size(); j++) {
-                        dictWriter.write(table[i].get(j));
+                        dictWriter.write(String.valueOf(table[i].get(j)));
+                        dictWriter.newLine();
                     }
-                    dictWriter.write(END_OF_LIST);
                 }
+                dictWriter.write(String.valueOf(END_OF_LIST));
+                dictWriter.newLine();
             }
 
         } catch (IOException e) {

@@ -24,7 +24,7 @@ public class Autocorrect {
     public static final int DIVIDOR = 163;
     public static final int MAX_CANDIDATES = 6;
 
-    private HashMap<String, ArrayList<String>> table;
+    private ArrayList<Integer>[] table;
 
     private class Pair {
         String word;
@@ -58,14 +58,11 @@ public class Autocorrect {
         dictionary = words;
         this.threshold = threshold;
     }
+
     public Autocorrect(String[] words) {
 
         dictionary = words;
     }
-    public Autocorrect() {
-        table = new HashMap<>();
-    }
-
 
 
     public int editDistance(String s1, String s2) {
@@ -86,11 +83,11 @@ public class Autocorrect {
                     table[i][j] = table[i - 1][j - 1];
                 } else {
                     // Delete
-                    table[i][j] = 1 + table[i-1][j];
+                    table[i][j] = 1 + table[i - 1][j];
                     // Addition
-                    table[i][j] = Math.min(table[i][j], table[i][j-1] + 1);
+                    table[i][j] = Math.min(table[i][j], table[i][j - 1] + 1);
                     //Swap
-                    table[i][j] = Math.min(table[i][j], table[i - 1][j-1] + 1);
+                    table[i][j] = Math.min(table[i][j], table[i - 1][j - 1] + 1);
                 }
             }
         }
@@ -115,8 +112,8 @@ public class Autocorrect {
 
             int editDistance = editDistance(typed, dictionary[i]);
 
-            if( editDistance <= threshold) {
-                valid.add(new Pair(dictionary[i], editDistance) );
+            if (editDistance <= threshold) {
+                valid.add(new Pair(dictionary[i], editDistance));
             }
         }
         valid.sort(Comparator.comparing(Pair::getWord));
@@ -129,7 +126,7 @@ public class Autocorrect {
             correct[i] = valid.get(i).word;
             System.out.println(correct[i]);
         }
-       return correct;
+        return correct;
     }
 
 
@@ -150,7 +147,6 @@ public class Autocorrect {
             String[] words = new String[n];
 
 
-
             for (int i = 0; i < n; i++) {
                 line = dictReader.readLine();
                 words[i] = line;
@@ -162,8 +158,7 @@ public class Autocorrect {
         }
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
 
 
         Scanner s = new Scanner(System.in);
@@ -172,16 +167,16 @@ public class Autocorrect {
         String word = s.nextLine();
 
         String[] candidates;
-        if(word.length() <= Ngram.N) {
-            Autocorrect a = new Autocorrect(loadDictionary("sorted"));
+        Autocorrect a = new Autocorrect(loadDictionary("sorted"));
+        if (word.length() <= Ngram.N) {
+
             candidates = a.smallMatches(word);
         } else {
-            Autocorrect a = new Autocorrect();
             candidates = a.generateCandidates(word);
 
         }
 
-        if(candidates == null) {
+        if (candidates == null) {
             return;
         }
 
@@ -193,7 +188,7 @@ public class Autocorrect {
         System.out.println("Do you want more words (Y/N)");
         String answer = s.nextLine();
 
-        if(answer.equalsIgnoreCase("Y")) {
+        if (answer.equalsIgnoreCase("Y")) {
             System.out.println("--------------------------------------");
             System.out.println("|" + candidates[3] + "|" + candidates[4] + "|" + candidates[5] + "|");
             System.out.println("--------------------------------------");
@@ -203,6 +198,7 @@ public class Autocorrect {
         return;
 
     }
+
     public String[] generateCandidates(String word) {
         this.initTable();
         int[] ngrams = Ngram.generateNgrams(word);
@@ -211,22 +207,21 @@ public class Autocorrect {
         populateCandidates(candidates);
 
         for (int i = 0; i < ngrams.length; i++) {
-            for (int j = 0; j < table.get(ngrams[i]).size(); j++) {
-                int editDistance = editDistance(table.get(ngrams[i]).get(j), word);
+            for (int j = 0; j < table[ngrams[i]].size(); j++) {
+                String candidate = dictionary[table[i].get(j)];
+                int editDistance = editDistance(word,candidate);
 
-                if(candidates.get(MAX_CANDIDATES - 1).editDistance > editDistance) {
-                    // Iterate through the candidates list and insert the new word by edit distance
-                    int counter = MAX_CANDIDATES - 1;
-                    while (editDistance < candidates.get(counter).editDistance && counter > 0) {
-                        counter--;
-                    }
-
-                    candidates.removeLast();
-                    candidates.add(counter, new Pair(table.get(ngrams[i]).get(j),editDistance));
+                int counter = MAX_CANDIDATES - 1;
+                while (editDistance < candidates.get(counter).editDistance && counter > 0) {
+                    counter--;
                 }
+
+                candidates.removeLast();
+                candidates.add(counter, new Pair(candidate,editDistance));
             }
+
         }
-        if(candidates.get(0).editDistance == 0) {
+        if (candidates.get(0).editDistance == 0) {
             return null;
         }
 
@@ -237,26 +232,25 @@ public class Autocorrect {
         }
         return candidateArr;
     }
+
     public void initTable() {
 
 
         try {
+            table = new ArrayList[Ngram.TABLE_LENGTH];
+
             String line;
-            BufferedReader dictReader = new BufferedReader(new FileReader("table.txt"));
-            line = dictReader.readLine();
+            BufferedReader dictReader = new BufferedReader(new FileReader(Ngram.N + "gram.txt"));
 
-            // Update instance variables with test data
-            int length = Integer.parseInt(line);
 
-            String ngram = dictReader.readLine();
-            while (ngram != null) {
-                String value = dictReader.readLine();
-                table.put(ngram, new ArrayList<>());
-                while (!value.equals(Ngram.END_OF_LIST)) {
-                    table.get(ngram).add(value);
-                    value = dictReader.readLine();
+            int dictIndex = Integer.parseInt(dictReader.readLine());
+            for (int i = 0; i < table.length; i++) {
+                while (dictIndex != Ngram.END_OF_LIST) {
+                    if (table[i] == null) table[i] = new ArrayList<>();
+                    table[i].add(dictIndex);
+                    dictIndex = Integer.parseInt(dictReader.readLine());
                 }
-                ngram = dictReader.readLine();
+                dictIndex = Integer.parseInt(dictReader.readLine());
             }
 
 
@@ -265,6 +259,7 @@ public class Autocorrect {
         }
 
     }
+
     private void populateCandidates(ArrayList<Pair> candidates) {
         Pair nullCandidate = new Pair(null, 100);
         for (int i = 0; i < MAX_CANDIDATES; i++) {
@@ -272,27 +267,27 @@ public class Autocorrect {
         }
     }
 
-    public  String[] smallMatches(String word) {
+    public String[] smallMatches(String word) {
 
-       ArrayList<Pair> candidates = new ArrayList<>();
+        ArrayList<Pair> candidates = new ArrayList<>();
 
-       populateCandidates(candidates);
+        populateCandidates(candidates);
 
         // For all the words that are less than three letters
         for (int i = 0; i < DIVIDOR; i++) {
             int editDistance = editDistance(dictionary[i], word);
             // Check to see if the current word has a shorter edit distance than the word that has lowest edit distance currently being tracked in candidates
-            if(candidates.get(MAX_CANDIDATES - 1).editDistance > editDistance) {
+            if (candidates.get(MAX_CANDIDATES - 1).editDistance > editDistance) {
                 // Iterate through the candidates list and insert the new word by edit distance
-                for (int j = MAX_CANDIDATES - 1; j > - 1; j--) {
-                    if(editDistance < candidates.get(j).editDistance) {
+                for (int j = MAX_CANDIDATES - 1; j > -1; j--) {
+                    if (editDistance < candidates.get(j).editDistance) {
                         candidates.removeLast();
                         candidates.add(j, new Pair(dictionary[i], editDistance));
                     }
                 }
             }
         }
-        if(candidates.get(0).editDistance == 0) {
+        if (candidates.get(0).editDistance == 0) {
             return null;
         }
         // Return the top six candidates as an array
@@ -314,7 +309,7 @@ public class Autocorrect {
 
             dictWriter.write(length + "");
             dictWriter.newLine();
-            for (String s: dictionary) {
+            for (String s : dictionary) {
                 dictWriter.write(s);
                 dictWriter.newLine();
             }
