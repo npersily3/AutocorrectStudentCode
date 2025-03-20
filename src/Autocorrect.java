@@ -1,5 +1,5 @@
 import java.io.*;
-import java.lang.reflect.Parameter;
+
 import java.util.*;
 
 /**
@@ -23,7 +23,6 @@ public class Autocorrect {
     private String[] dictionary;
     private int threshold;
     public static final int DIVIDOR = 163;
-    public static final int MAX_CANDIDATES = 6;
 
     private ArrayList<Integer>[] table;
 
@@ -183,15 +182,15 @@ public class Autocorrect {
         }
 
 
-
-        for (int i = 0; i < candidates.length ; i++) {
-            if(i % Ngram.N == 0) {
+        for (int i = 0; i < candidates.length; i++) {
+            if (i % Ngram.N == 0) {
                 System.out.println("|");
                 System.out.println("--------------------------------------");
             }
             System.out.print("|" + candidates[i].word);
         }
-
+        System.out.println("|");
+        System.out.println("--------------------------------------");
 
     }
 
@@ -199,28 +198,30 @@ public class Autocorrect {
         this.initTable();
         int[] ngrams = Ngram.generateNgrams(word);
 
-        ArrayList<String> seen = new ArrayList();
-        ArrayList<Pair> candidates = new ArrayList<>();
+        HashMap<String, Integer> candy = new HashMap<>();
+
 
         for (int i = 0; i < ngrams.length; i++) {
             for (int j = 0; j < table[ngrams[i]].size(); j++) {
 
                 String candidate = dictionary[table[ngrams[i]].get(j)];
-                if(seen.contains(candidate)) {
-                    continue;
-                } else {
-                    seen.add(candidate);
-                }
+
                 int editDistance = editDistance(word, candidate);
 
-                if (editDistance <= threshold) candidates.add(new Pair(candidate, editDistance));
-
+                if (editDistance <= threshold) {
+                    if (!candy.containsKey(candidate))
+                        candy.put(candidate, editDistance);
+                }
             }
+        }
+        ArrayList<Pair> candidates = new ArrayList<>();
 
+        String[] values = candy.keySet().toArray(new String[0]);
+        for (int i = 0; i < values.length; i++) {
+            candidates.add(new Pair(values[i], candy.get(values[i])));
         }
 
         candidates.sort(Comparator.comparing(Pair::getEditDistance));
-
 
         return candidates.toArray(new Pair[0]);
     }
@@ -264,29 +265,28 @@ public class Autocorrect {
 
     }
 
-    private void populateCandidates(ArrayList<Pair> candidates) {
-        Pair nullCandidate = new Pair(null, 100);
-        for (int i = 0; i < MAX_CANDIDATES; i++) {
-            candidates.add(nullCandidate);
-        }
-    }
 
     public Pair[] smallMatches(String word) {
 
         ArrayList<Pair> candidates = new ArrayList<>();
+        ArrayList<String> seen = new ArrayList<>();
 
-        populateCandidates(candidates);
 
         // For all the words that are less than three letters
         for (int i = 0; i < DIVIDOR; i++) {
             int editDistance = editDistance(dictionary[i], word);
+            if (seen.contains(dictionary[i])) {
+                continue;
+            } else {
+                seen.add(dictionary[i]);
+            }
             if (editDistance <= threshold) {
                 candidates.add(new Pair(dictionary[i], editDistance));
             }
 
 
         }
-        if (candidates.get(0).editDistance == 0) {
+        if (candidates.getFirst().editDistance == 0) {
             return null;
         }
         candidates.sort(Comparator.comparing(Pair::getEditDistance));
@@ -296,7 +296,7 @@ public class Autocorrect {
 
     public static void sortDictionary() {
         try {
-            String line;
+
             BufferedWriter dictWriter = new BufferedWriter(new FileWriter("/dictionares/sorted.txt"));
             String[] dictionary = loadDictionary("large");
             Arrays.sort(dictionary, Comparator.comparing(String::length));
