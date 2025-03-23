@@ -300,9 +300,9 @@ public class Autocorrect {
             int editDistance = editDistance(dictionary[i], word);
             // If within threshold and not found already put into hashMap
             if (editDistance <= threshold) {
-               if(!candidateHash.containsKey(dictionary[i])) {
-                   candidateHash.put(dictionary[i], editDistance);
-               }
+                if (!candidateHash.containsKey(dictionary[i])) {
+                    candidateHash.put(dictionary[i], editDistance);
+                }
             }
 
 
