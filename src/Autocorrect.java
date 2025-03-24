@@ -331,7 +331,7 @@ public class Autocorrect {
         try {
 
             BufferedWriter dictWriter = new BufferedWriter(new FileWriter("/dictionaries/sorted.txt"));
-            // Read in entrie dictionary and sort it
+            // Read in entire dictionary and sort it
             String[] dictionary = loadDictionary("large");
             Arrays.sort(dictionary, Comparator.comparing(String::length));
 
