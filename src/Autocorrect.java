@@ -177,7 +177,7 @@ public class Autocorrect {
         Autocorrect a = new Autocorrect(loadDictionary("sorted"));
 
         // Determines if inputted word is greater than n and sets threshold accordingly
-        if (word.length() <= Ngram.N) {
+        if (word.length() < Ngram.N) {
             a.threshold = 1;
             candidates = a.smallMatches(word);
         } else {
